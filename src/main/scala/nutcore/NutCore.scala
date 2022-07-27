@@ -1,6 +1,7 @@
 package nutcore
 
 import chisel3._
+import chisel3.util._
 import nutcore.backend.fu._
 import nutcore.backend.ooo.HasBackendConst
 import top.Settings
@@ -51,3 +52,21 @@ case class NutCoreConfig(
                           EnableDebug: Boolean = Settings.get("EnableDebug"),
                           EnhancedLog: Boolean = true
                         )
+
+// Enable EnhancedLog will slow down simulation,
+// but make it possible to control debug log using emu parameter
+
+object AddressSpace extends HasNutCoreParameter {
+  // (start, size)
+  // address out of MMIO will be considered as DRAM
+  def mmio = List(
+    (0x30000000L, 0x10000000L),  // internal devices, such as CLINT and PLIC
+    (Settings.getLong("MMIOBase"), Settings.getLong("MMIOSize")) // external devices
+  )
+
+  def isMMIO(addr: UInt) = mmio.map(range => {
+    require(isPow2(range._2))
+    val bits = log2Up(range._2)
+    (addr ^ range._1.U)(PAddrBits-1, bits) === 0.U
+  }).reduce(_ || _)
+}

@@ -1,8 +1,10 @@
 package nutcore.backend.ooo
 
+import bus.simplebus.SimpleBusUC
 import chisel3._
 import chisel3.util._
 import nutcore._
+import utils._
 
 trait HasBackendConst {
   // val multiIssue = true
