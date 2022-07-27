@@ -340,3 +340,5 @@ project/plugins/project/
 hs_err_pid*
 
 /project/
+/*_build/
+/*_prove/

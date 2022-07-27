@@ -29,7 +29,7 @@ object MaskExpand {
 
 object MaskData {
  def apply(oldData: UInt, newData: UInt, fullmask: UInt) = {
-   (newData & fullmask) | (oldData & ~fullmask)
+   (newData & fullmask) | (oldData & (~fullmask).asUInt)
  }
 }
 

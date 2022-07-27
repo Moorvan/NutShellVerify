@@ -18,6 +18,7 @@ package utils
 
 import chisel3._
 import chisel3.util.experimental.BoringUtils
+import nutcore.NutCoreConfig
 import utils.LogLevel.LogLevel
 
 object LogLevel extends Enumeration {
