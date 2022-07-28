@@ -16,12 +16,13 @@
 
 package nutcore.backend.ooo
 
+import bus.simplebus.SimpleBusUC
 import chisel3._
 import chisel3.util._
 import chisel3.util.experimental.BoringUtils
 import nutcore.backend.fu._
 import utils._
-import nutcore.{MisPredictionRecIO, NutCoreModule, OOCommitIO, RenamedDecodeIO}
+import nutcore._
 
 trait HasRSConst {
   // val rsSize = 4
@@ -223,10 +224,10 @@ class RS(size: Int = 2, pipelined: Boolean = true, fifo: Boolean = false, priori
         )
       }
     )
-    when(io.in.fire()) {
+    when(io.in.fire) {
       priorityMask(enqueueSelect) := valid
     }
-    when(io.out.fire()) {
+    when(io.out.fire) {
       (0 until rsSize).map(i => priorityMask(i)(dequeueSelect) := false.B)
     }
     when(io.flush) {
@@ -257,11 +258,11 @@ class RS(size: Int = 2, pipelined: Boolean = true, fifo: Boolean = false, priori
         )
       }
     )
-    when(io.in.fire()) {
+    when(io.in.fire) {
       priorityMask(enqueueSelect) := valid
       needStore(enqueueSelect) := LSUOpType.needMemWrite(io.in.bits.decode.ctrl.fuOpType)
     }
-    when(io.out.fire()) {
+    when(io.out.fire) {
       (0 until rsSize).map(i => priorityMask(i)(dequeueSelect) := false.B)
     }
     when(io.flush) {
@@ -349,10 +350,10 @@ class RS(size: Int = 2, pipelined: Boolean = true, fifo: Boolean = false, priori
     io.recoverCheckpoint.get.bits := dequeueSelect
 
     val pending = RegInit(VecInit(Seq.fill(rsSize)(false.B)))
-    when(io.in.fire()) {
+    when(io.in.fire) {
       pending(enqueueSelect) := true.B
     }
-    when(io.out.fire()) {
+    when(io.out.fire) {
       pending(dequeueSelect) := false.B
     }
     when(io.flush) {

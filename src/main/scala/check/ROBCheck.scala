@@ -9,10 +9,9 @@ import nutcore.backend.ooo._
 
 
 class ROBCheck {
-
 }
 
 
 object ROBCheck extends App {
-  Check.generateRTL(() => new CSR()(NutCoreConfig()))
+  Check.generateRTL(() => new ROB()(NutCoreConfig()))
 }
