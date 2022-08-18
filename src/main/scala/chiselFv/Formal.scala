@@ -11,20 +11,67 @@ trait Formal {
   resetCounter.io.clk := clock
   resetCounter.io.reset := reset
   val timeSinceReset = resetCounter.io.timeSinceReset
-  val notChaos = resetCounter.io.notChaos
+  val notChaos       = resetCounter.io.notChaos
 
   def assert(cond: Bool, msg: String = "")
             (implicit sourceInfo: SourceInfo,
              compileOptions: CompileOptions): Unit = {
-    when (notChaos) {
+    when(notChaos) {
       cassert(cond, msg)
     }
+  }
+
+  def assertAfterNStepWhen(cond: Bool, n: Int, asert: Bool, msg: String = "")
+                     (implicit sourceInfo: SourceInfo,
+                      compileOptions: CompileOptions): Unit = {
+    val next = RegInit(VecInit(Seq.fill(n)(false.B)))
+    when(cond) {
+      next(0) := true.B
+    }.otherwise {
+      next(0) := false.B
+    }
+    for (i <- 1 until n) {
+      next(i) := next(i - 1)
+    }
+    when(next(n - 1)) {
+      assert(asert, msg)
+    }
+  }
+
+  def assertNextStepWhen(cond: Bool, asert: Bool, msg: String = "")
+                        (implicit sourceInfo: SourceInfo,
+                         compileOptions: CompileOptions): Unit = {
+    val flag = RegInit(false.B)
+    when(cond) {
+      flag := true.B
+    }.otherwise {
+      flag := false.B
+    }
+    when(flag) {
+      assert(asert, msg)
+    }
+  }
+
+  def assertAlwaysAfterNStepWhen(cond: Bool, n: Int, asert: Bool, msg: String = "")
+                                (implicit sourceInfo: SourceInfo,
+                                 compileOptions: CompileOptions): Unit = {
+    val next = RegInit(VecInit(Seq.fill(n)(false.B)))
+    when(cond) {
+      next(0) := true.B
+    }
+    for (i <- 1 until n) {
+      next(i) := next(i - 1)
+    }
+    when(next(n - 1)) {
+      assert(asert, msg)
+    }
+
   }
 
   def past[T <: Data](value: T, n: Int)(block: T => Any)
                      (implicit sourceInfo: SourceInfo,
                       compileOptions: CompileOptions): Unit = {
-    when (notChaos & timeSinceReset >= n.U) {
+    when(notChaos & timeSinceReset >= n.U) {
       block(Delay(value, n))
     }
   }
@@ -40,4 +87,5 @@ trait Formal {
     val cst = Module(new AnyConst(w))
     cst.io.out
   }
+
 }
